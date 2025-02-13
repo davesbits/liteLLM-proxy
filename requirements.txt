@@ -1,6 +1,8 @@
-uvicorn
-fastapi
-litellm
-backoff
-redis
-supabase
+uvicorn>=0.24.0
+fastapi>=0.104.0
+litellm==1.10.1
+backoff>=2.2.1
+redis>=5.0.0
+supabase>=2.0.0
+openai==0.28.0
+requests

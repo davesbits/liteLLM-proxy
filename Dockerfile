@@ -1,14 +1,40 @@
-# Use an official Python runtime as a parent image
-FROM python:3.8
+# Use a newer Python base image for better compatibility
+FROM python:3.9-slim
+
+# Install system dependencies including Rust and build tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    curl \
+    pkg-config \
+    libssl-dev \
+    python3-dev \
+    build-essential \
+    git \
+    libpq-dev \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Copy just the requirements file first
+COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Create and activate virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir wheel setuptools && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
+COPY . .
 
 # Expose the port that your FastAPI application will run on
 EXPOSE 8080
